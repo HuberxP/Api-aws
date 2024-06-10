@@ -1,14 +1,24 @@
-*Primero instalar node.js*
-*Segundo instalar Postman o Insomnia*
-*Tercero descargar postgres*
+**PROBAR CODIGO DE FOMRA LOCAL UTILIZANDO POSTGRES**
+  1. Tener instalado node en windows o linux
+  2. Tener instalado Postgres en windows o linux
+  3. Crear una base de datos en Postgres con el nombre "prueba"
+  4. Crear una tabla en la base de datos "prueba" con el nombre "usuario"
+  5. Puede utilizar PgAdmin4 para administrar a base de datos local
 
-**Ya instaladas todas**
 
-1. despues de instalar postgres, buscar una aplicacion que se llama pgAdmin para crear la base de datos y las tablas
+*Instalando dependencias*
+  1. Estando en Visual Studio abrir la carpeta del proyecto
+  2. Abrir la terminal y escribir "npm i pg express" para instalar los modulos necesarios
+  3. Abrir el archivo llamado conexion.js que esta en la carpeta controllers y modificar según la informacion de su base de datos. 
+  4. Guardar todos los cambios
+  5. Abrir la terminal y escribir "node main.js" para ejecutar y correr en el puerto.
+  6. Abrir el navegador y escribir "http://localhost:3002/usuario" para que se muestre la consulta 
 
-CREATE DATABASE api-1;
 
-2. Crear una tabla a esa base de datos, por ejemplo usuario:
+
+**COMANDOS SQL PARA LA CREACION DE LAS TABLAS Y USUARIOS**
+
+1. Crear una tabla a esa base de datos, por ejemplo usuario:
 
 CREATE TABLE usuario (
     id SERIAL PRIMARY KEY,
@@ -25,45 +35,70 @@ INSERT INTO usuario (nombre, apellido, correo, telefono) VALUES ('Ana', 'Gomez',
 INSERT INTO usuario (nombre, apellido, correo, telefono) VALUES ('Carlos', 'Sanchez', 'carlos.sanchez@example.com', '555-555-5555');
 
 
-*Comandos Para Visual studio*
-npm  init -y = Para inicializar el proyecto
-npm -i express pg = descargar complementos necesarios
+**UTILIZANDO POSTMAN CON METODO GET**
+1. Descargar postman
+2. Abrir postman y crear una nueva solicitud
+3. Seleccionar el metodo GET y escribir la url "http://localhost:3002/usuario (hará una consulta de los usurios)
+4. Presionar el botón "Send" para enviar la solicitud
+5. Se mostrarán los resultados en la sección "Body" de postman
 
-*Nodemon*
-npm i nodemon -D
-
-Se edita el archivo Package.json en el apartado de scripts
-"dev": "nodemon ruta del index, ejemplo src/js/index.js
-
-se ejecuta el comando = npm run dev
-
-(node src/js/index.js)
-
-
-psql -U postgres
-
-sudo -u postgres psql
-
-
-
-
-
-#Comado para insertar y actulizar datos en json
+**UTILIZANDO POSTMAN CON METODO POST**
+1. crear una solicitud post
+2. Seleccionar el metodo POST y escribir la url "http://localhost:3002/usuario
+3. En la sección "Body" de postman, seleccionar "raw" 
+4. En el campo de texto, escribir en formato JSON los datos del usuario que se quiere
+agregar, por ejemplo:
 
 {
 "nombre": "Huber",
 "apellido": "Hernandez",
-"correo": "hernandezhuber48@gmail.com",
+"correo": "hernandezhuber@gmail.com",
 "telefono": "3214567890"
 }
------------------------------------------------------------------------------------------------------------------
+5. Presionar el botón "Send" para enviar la solicitud
+6. Finalmente mostrará un mensaje notificando el estado de la solicitud
+
+**UTILIZANDO POSTMAN PARA EL METODO PUT**
+1. crear una solicitud put
+2. Seleccionar el metodo PUT y escribir la url "http://localhost:3002/usuario/(id)
+3. Recuerde al final especificar el id del usuario a actulizar
+4. En la sección "Body" de postman, seleccionar "raw"
+5. En el campo de texto, escribir en formato JSON los datos del usuario que se quiere actualizar (Este metodo actualizará la tabla completa).
+agregar por ejemplo:
+{
+"nombre": "Huber",
+"apellido": "Hernandez",
+"correo": "hernandezhuber@gmail.com",
+"telefono": "0000000000"
+}
+
+**UTILIZANDO POSTMAN PARA EL METODO PATCH**
+1. crear una solicitud patch
+2. Seleccionar el metodo PATCH y escribir la url "http://localhost:3002/usuario/(id)
+3. Recuerde al final especificar el id del usuario a actulizar
+4. En la sección "Body" de postman, seleccionar "raw"
+5. En el campo de texto, escribir en formato JSON los datos del usuario que se quiere actualizar ( en este metodo lo bastará con poner lo que vas actuluzar en sí)
+agregar por ejemplo: el nombre del id 1
+
+{
+"nombre": "Goku"
+}
+
+  **UTILIZANDO POSTMAN PARA EL METODO DELETE**
+  1. crear una solicitud delete
+  2. Seleccionar el metodo DELETE y escribir la url "http://localhost:3002/usuario/(id) 
+  3. Recuerde al final especificar el id del usuario a eliminar
+  4. Presionar el botón "Send" para enviar la solicitud
+  5. Finalmente mostrará un mensaje notificando el estado de la solicitud
+
+  **UTILIZANDO POSTMAN PARA EL METODO OPTIONS**
+  1. crear una solicitud options
+  2. Seleccionar el metodo OPTIONS y escribir la url "http://localhost:3002/usuario
+  3. Presionar el botón "Send" para enviar la solicitud
+  4. Finalmente mostrará un mensaje notificando el estado de la solicitud
 
 
-
-   
-
-
-
+  **CONFIGURANDO LA INSTANCIA DE AMAZON LINUX**
 
    ,     #_
    ~\_  ####_       
@@ -77,25 +112,75 @@ sudo -u postgres psql
        _/m/'
 
 
+1. Conectarse a la instancia por ssh y correr los comandos:
 
- #!/bin/bash
-yum update -y
-yum install -y nginx
-systemctl start nginx
-systemctl enable nginx
-
-
-
--- Crear una tabla llamada 'usuario'
-CREATE TABLE usuario (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100),
-    apellido VARCHAR(100),
-    correo TEXT,
-    telefono VARCHAR(20)
-);
+  yum update -y
+  yum install -y nginx
+  yun install node 
+  yum install git 
+  yum install pm2
 
 
-pm2 start main.js
+  systemctl start nginx (Iniciar el servidor )
+  systemctl enable nginx (Habilitar e servidor)
 
-node index.js
+
+*Clonar el repositorio en la ruta preferida*
+1. Estando en el directorio donde va a clonar el proyecto correr el sigueinte comando: sudo git clone <link del repositorio>
+2. Ingresar a la carpeta del proyecto Api-aws
+3. Correr los comandos: npm i pg (instalar los modulos pg)
+4. Correr el comando: npm i express (instalar modulos express)
+5. correr el comando: pm2 start main.js
+6. correr el comando: pm2 status (Ver el estado de los servicios que se esta ejecuntando)
+
+*Modificar el archivo de configuracion de nginx*
+1. Correr el comando: sudo nano /etc/nginx/nginx.conf
+2. Modificar el root debe aparecer asi:
+   root         /usr/share/nginx/html;
+
+   Debe quedar asi: 
+   root          /home/ec2-user/Api-aws;
+
+   (Se especifica la direccion donde esta el directorio del archivo main.js)
+
+3. Agregar la siguiente configuración debajo de esta parte:  include /etc/nginx/default.d/*.conf;
+
+
+  location /
+		{
+			proxy_set_header X-Real-Ip	$remote_addr;
+			proxy_set_header Host		$http_host;
+			proxy_pass			http://127.0.0.1:3002;
+		}
+
+  debe quedar asi: 
+  ![alt text](conf.png)
+
+4. Guardar las modificaciones 
+5. reinicar el servidor ngingx: sudo systemctl restart nginx
+6. Comprobar estado: sudo systemctl status nginx
+7. Copiar la ip de la instacia y verificar en un navegador: http://{ip}/usuario
+
+**PD:** Si les lanza error por certificados ssl:
+
+1. Modificar el archivo llamado conexion.js
+2. Agregar la siguiente configuración en la parte de la conexión a la base de datos:
+
+  const { Pool } = require('pg');
+
+const pool = new Pool({
+    host: 'localhost',
+    user: 'postgres',
+    password: 'postgres',
+    database: 'practica-1',
+    port: '5432',
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+module.exports = pool;
+
+**Explicacion:** Se le añade la linea de codigo para que no pida el ssl, recordar cambiar la informacion de la base de datos 
+
+
