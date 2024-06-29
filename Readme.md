@@ -28,11 +28,53 @@ CREATE TABLE usuario (
     telefono VARCHAR(20)
 );
 
+CREATE TABLE productos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255),
+    precio DECIMAL(10, 2),
+    estado VARCHAR(20) CHECK (estado IN ('disponible', 'agotado')),
+    imagen_url TEXT
+);
+
+CREATE TABLE clientes (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255),
+    nombre2 VARCHAR(255),
+    apellido VARCHAR(255),
+    apellido2 VARCHAR(255),
+    direccion VARCHAR(255),
+    correo TEXT,
+    telefono VARCHAR(20)
+);
+
+CREATE TABLE ordenes (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    producto_id INTEGER NOT NULL,
+    cantidad INTEGER NOT NULL,
+    fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+);
+
 3. Ingresar datos a la db:
 
 INSERT INTO usuario (nombre, apellido, correo, telefono) VALUES ('Juan', 'Perez', 'juan.perez@example.com', '123-456-7890');
 INSERT INTO usuario (nombre, apellido, correo, telefono) VALUES ('Ana', 'Gomez', 'ana.gomez@example.com', '098-765-4321');
 INSERT INTO usuario (nombre, apellido, correo, telefono) VALUES ('Carlos', 'Sanchez', 'carlos.sanchez@example.com', '555-555-5555');
+
+
+-- Insertar un producto
+INSERT INTO productos (nombre, precio, estado, imagen_url)
+VALUES ('Producto 1', 29.99, 'disponible', 'https://s3.amazonaws.com/tu-bucket/imagen1.jpg');
+
+-- Insertar otro producto
+INSERT INTO productos (nombre, precio, estado, imagen_url)
+VALUES ('Producto 2', 49.99, 'disponible', 'https://s3.amazonaws.com/tu-bucket/imagen2.jpg');
+
+-- Insertar un producto agotado
+INSERT INTO productos (nombre, precio, estado, imagen_url)
+VALUES ('Producto 3', 19.99, 'agotado', 'https://s3.amazonaws.com/tu-bucket/imagen3.jpg');
 
 
 **UTILIZANDO POSTMAN CON METODO GET**
@@ -183,4 +225,26 @@ module.exports = pool;
 
 **Explicacion:** Se le añade la linea de codigo para que no pida el ssl, recordar cambiar la informacion de la base de datos 
 
+
+**Actualizacion**
+
+ALTER TABLE usuario
+ADD COLUMN nombre_usuario VARCHAR(50),
+ADD COLUMN contraseña BYTEA;
+
+CREATE OR REPLACE FUNCTION encrypt_password(text)
+RETURNS BYTEA AS $$
+DECLARE
+  salt BYTEA := gen_salt('bf');
+  encrypted_password BYTEA;
+BEGIN
+  encrypted_password := crypt($1, salt);
+  RETURN encrypted_password;
+END;
+$$ LANGUAGE plpgsql;
+
+UPDATE usuario
+SET contraseña = encrypt_password('mi_contraseña_inicial');
+
+************************************************************
 

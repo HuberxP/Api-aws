@@ -16,20 +16,20 @@ const getUsers = async (req, res) => {
 };
 
 const createUsers = async (req, res) => {
-    const { nombre, apellido, correo, telefono } = req.body;
-    if (!nombre || !apellido || !correo || !telefono) {
+    const { id, nombre, apellido, correo, telefono, nombre_usuario, contraseña } = req.body;
+    if (!nombre || !apellido || !correo || !telefono || !nombre_usuario || !contraseña) {
         return res.status(400).send('Todos los campos son obligatorios');
     }
 
     try {
         const response = await pool.query(
-            'INSERT INTO usuario (nombre, apellido, correo, telefono) VALUES ($1, $2, $3, $4)',
-            [nombre, apellido, correo, telefono]
+            'INSERT INTO usuario (nombre, apellido, correo, telefono, nombre_usuario, contraseña) VALUES ($1, $2, $3, $4, $5, $6)',
+            [nombre, apellido, correo, telefono, nombre_usuario, contraseña]
         );
         res.json({
             message: 'Usuario creado con éxito',
             body: {
-                user: { nombre, apellido, correo, telefono }
+                user: {nombre, apellido, correo, telefono, nombre_usuario, contraseña }
             }
         });
     } catch (error) {
@@ -52,16 +52,16 @@ const getUserbyId = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const id = req.params.id;
-    const { nombre, apellido, correo, telefono } = req.body;
+    const { nombre, apellido, correo, telefono, nombre_usuario, contraseña } = req.body;
 
-    if (!nombre || !apellido || !correo || !telefono) {
+    if (!nombre || !apellido || !correo || !telefono || !nombre_usuario || !contraseña) {
         return res.status(400).send('Todos los campos son obligatorios');
     }
 
     try {
         const response = await pool.query(
-            'UPDATE usuario SET nombre = $1, apellido = $2, correo = $3, telefono = $4 WHERE id = $5',
-            [nombre, apellido, correo, telefono, id]
+            'UPDATE usuario SET nombre = $1, apellido = $2, correo = $3, telefono = $4, nombre_usuario = $5, contraseña = $6 WHERE id = $7',
+            [nombre, apellido, correo, telefono, nombre_usuario, contraseña, id]
         );
         if (response.rowCount === 0) {
             return res.status(404).send('Usuario no encontrado');
@@ -110,6 +110,7 @@ const patchUser = async (req, res) => {
     } catch (error) {
         handleError(res, error);
     }
+
 };
 
 const optionsHandler = (req, res) => {
