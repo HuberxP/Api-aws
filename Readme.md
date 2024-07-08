@@ -248,3 +248,5 @@ SET contraseña = encrypt_password('mi_contraseña_inicial');
 
 ************************************************************
 
+**Crear Clave secreta**
+npm install dotenv

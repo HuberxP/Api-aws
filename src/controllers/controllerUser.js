@@ -1,11 +1,27 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const pool = require('./conexion');
+require('dotenv').config();
 
+const SECRET_KEY = process.env.SECRET_KEY || 'default_secret_key';
 
 const handleError = (res, error) => {
     console.error('Error ejecutando la consulta', error.stack);
     res.status(500).send('Error conectando a la base de datos');
 };
 
+//Función para contar todos los usuarios
+const countAllUsers = async (req, res) => {
+    try {
+        const response = await pool.query('SELECT COUNT(*) FROM usuario');
+        const count = parseInt(response.rows[0].count, 10);
+        res.status(200).json({ count });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+// Rutas y controladores de usuarios
 const getUsers = async (req, res) => {
     try {
         const response = await pool.query('SELECT * FROM usuario');
@@ -15,21 +31,23 @@ const getUsers = async (req, res) => {
     }
 };
 
-const createUsers = async (req, res) => {
-    const { id, nombre, apellido, correo, telefono, nombre_usuario, contraseña } = req.body;
+const createUser = async (req, res) => {
+    const { nombre, apellido, correo, telefono, nombre_usuario, contraseña } = req.body;
     if (!nombre || !apellido || !correo || !telefono || !nombre_usuario || !contraseña) {
         return res.status(400).send('Todos los campos son obligatorios');
     }
 
     try {
+        // Hashea la contraseña antes de guardarla
+        const hashedPassword = await bcrypt.hash(contraseña, 10);
         const response = await pool.query(
-            'INSERT INTO usuario (nombre, apellido, correo, telefono, nombre_usuario, contraseña) VALUES ($1, $2, $3, $4, $5, $6)',
-            [nombre, apellido, correo, telefono, nombre_usuario, contraseña]
+            'INSERT INTO usuario (nombre, apellido, correo, telefono, nombre_usuario, contraseña) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+            [nombre, apellido, correo, telefono, nombre_usuario, hashedPassword]
         );
         res.json({
             message: 'Usuario creado con éxito',
             body: {
-                user: {nombre, apellido, correo, telefono, nombre_usuario, contraseña }
+                user: { nombre, apellido, correo, telefono, nombre_usuario, contraseña: hashedPassword }
             }
         });
     } catch (error) {
@@ -59,9 +77,10 @@ const updateUser = async (req, res) => {
     }
 
     try {
+        const hashedPassword = await bcrypt.hash(contraseña, 10);
         const response = await pool.query(
             'UPDATE usuario SET nombre = $1, apellido = $2, correo = $3, telefono = $4, nombre_usuario = $5, contraseña = $6 WHERE id = $7',
-            [nombre, apellido, correo, telefono, nombre_usuario, contraseña, id]
+            [nombre, apellido, correo, telefono, nombre_usuario, hashedPassword, id]
         );
         if (response.rowCount === 0) {
             return res.status(404).send('Usuario no encontrado');
@@ -110,23 +129,64 @@ const patchUser = async (req, res) => {
     } catch (error) {
         handleError(res, error);
     }
-
 };
 
 const optionsHandler = (req, res) => {
     res.setHeader('Allow', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    //res.sendStatus(204);
-    res.json({message: 'Métodos encontrados, revisa el Header'});
+    res.json({ message: 'Métodos encontrados, revisa el Header' });
 };
 
+// Nueva ruta para inicio de sesión
+const loginUser = async (req, res) => {
+    const { nombre_usuario, contraseña } = req.body;
+    if (!nombre_usuario || !contraseña) {
+        return res.status(400).send('Todos los campos son obligatorios');
+    }
+
+    try {
+        // Buscar el usuario por nombre_usuario
+        console.log('Buscando usuario:', nombre_usuario);
+        const result = await pool.query('SELECT * FROM usuario WHERE nombre_usuario = $1', [nombre_usuario]);
+
+        if (result.rows.length === 0) {
+            console.log('Usuario no encontrado');
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        const user = result.rows[0];
+        console.log('Usuario encontrado:', user);
+
+        const storedPassword = user.contraseña.toString('utf-8');
+
+        // Comparar la contraseña ingresada con la almacenada
+        const match = await bcrypt.compare(contraseña, storedPassword);
+        console.log('Comparación de contraseña:', match);
+
+        if (!match) {
+            console.log('Credenciales inválidas');
+            return res.status(401).send('Credenciales inválidas');
+        }
+
+        // Generar un token JWT
+        const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+        console.log('Token generado:', token);
+
+        res.json({ token });
+    } catch (error) {
+        console.error('Error en loginUser:', error.stack);
+        handleError(res, error);
+    }
+};
 
 
 module.exports = {
     getUsers,
-    createUsers,
+    createUser,
     getUserbyId,
     updateUser,
     deleteUser,
     patchUser,
-    optionsHandler
+    optionsHandler,
+    loginUser,
+    countAllUsers
 };

@@ -6,6 +6,36 @@ const handleError = (res, error) => {
     res.status(500).send('Error conectando a la base de datos');
 };
 
+
+
+// Función para contar todos los productos
+
+
+const countAllProducts = async (req, res) => {
+    try {
+        const response = await pool.query('SELECT COUNT(*) FROM productos');
+        const count = parseInt(response.rows[0].count, 10);
+        res.status(200).json({ count });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+// Función para contar productos según su estado
+const countProductsByStatus = async (req, res) => {
+    const estado = req.query.estado;
+    try {
+        const response = await pool.query('SELECT COUNT(*) FROM productos WHERE estado = $1', [estado]);
+        const count = parseInt(response.rows[0].count, 10);
+        res.status(200).json({ count });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+// Resto de funciones...
+
+
 const getProducts = async (req, res) => {
     try {
         const response = await pool.query('SELECT * FROM productos');
@@ -123,6 +153,9 @@ module.exports = {
     getProductbyId,
     deleteProduct,
     patchProduct, 
-    updateProduct
+    updateProduct,
+    countAllProducts,
+    countProductsByStatus
+
    
 };

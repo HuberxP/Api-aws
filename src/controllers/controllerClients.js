@@ -2,9 +2,25 @@ const pool = require('./conexion');
 
 
 const handleError = (res, error) => {
-    console.error('Error ejecutando la consulta', error.stack); 
-    res.status(500).send('Error conectando a la base de datos');
+    console.error("Error en la consulta SQL:", error);
+    res.status(500).json({ error: 'Error en la consulta SQL' });
 };
+
+
+
+// Función para contar todos los clientes
+const countAllClients = async (req, res) => {
+    try {
+        const response = await pool.query('SELECT COUNT(*) FROM clientes');
+        const count = parseInt(response.rows[0].count, 10);
+        res.status(200).json({ count });
+    } catch (error) {
+        handleError(res, error);
+    }
+}
+
+
+
 
 const getClients = async (req, res) => {
     try {
@@ -40,7 +56,7 @@ const createClient = async (req, res) => {
 const getClientId = async (req, res) => {
     const id = req.params.id;
     try {
-        const response = await pool.query('SELECT * FROM productos WHERE id = $1', [id]);
+        const response = await pool.query('SELECT * FROM clientes WHERE id = $1', [id]);
         if (response.rows.length === 0) {
             return res.status(404).send('Cliente no encontrado');
         }
@@ -123,6 +139,7 @@ module.exports = {
     getClientId,
     deleteClient,
     patchClient, 
-    updateClient
+    updateClient,
+    countAllClients
    
 };
